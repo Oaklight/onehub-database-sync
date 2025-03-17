@@ -8,11 +8,11 @@ with open("config.toml", "rb") as f:
 
 # 获取 PostgreSQL 配置
 pg_db_config = {
-    "dbname": config["postgresql"]["dbname"],
-    "user": config["postgresql"]["user"],
-    "password": config["postgresql"]["password"],
-    "host": config["postgresql"]["host"],
-    "port": config["postgresql"]["port"],
+    "dbname": config["postgresql"]["cloud"]["dbname"],
+    "user": config["postgresql"]["cloud"]["user"],
+    "password": config["postgresql"]["cloud"]["password"],
+    "host": config["postgresql"]["cloud"]["host"],
+    "port": config["postgresql"]["cloud"]["port"],
 }
 
 try:
@@ -29,7 +29,7 @@ try:
         WHERE table_schema = 'public' AND table_type = 'BASE TABLE';
     """
     )
-    tables = cursor.fetchall()
+    tables = sorted(cursor.fetchall(), key=lambda x: x[0])
 
     print("\nTables in the database:")
     for table in tables:
@@ -50,7 +50,7 @@ try:
         """,
             (table_name,),
         )
-        columns = cursor.fetchall()
+        columns = sorted(cursor.fetchall(), key=lambda x: x[0])
 
         # 打印表头
         print(f"{'Column Name':<20} {'Data Type':<15} {'Nullable':<8} {'Default':<15}")
@@ -78,7 +78,7 @@ try:
         primary_keys = [pk[0] for pk in cursor.fetchall()]
 
         if primary_keys:
-            print(f"\nPrimary Keys: {', '.join(primary_keys)}")
+            print(f"\nPrimary Keys: {', '.join(sorted(primary_keys))}")
 
         # 获取外键信息
         cursor.execute(
@@ -95,7 +95,7 @@ try:
 
         if foreign_keys:
             print("\nForeign Keys:")
-            for fk in foreign_keys:
+            for fk in sorted(foreign_keys, key=lambda x: x[2]):
                 fk_name = fk[0]
                 fk_to_table = fk[1]
                 fk_from_col = fk[2]

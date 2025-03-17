@@ -9,7 +9,7 @@ try:
     print("Successfully connected to SQLite database.")
 
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-    tables = cursor.fetchall()
+    tables = sorted(cursor.fetchall(), key=lambda x: x[0])
 
     print("\nTables in the database:")
     for table in tables:
@@ -23,7 +23,7 @@ try:
         print(f"\nDetails for table '{table_name}':")
 
         cursor.execute(f"PRAGMA table_info({table_name});")
-        columns = cursor.fetchall()
+        columns = sorted(cursor.fetchall(), key=lambda x: x[1])
 
         # 打印表头
         print(
@@ -47,7 +47,7 @@ try:
 
         if foreign_keys:
             print(f"\nForeign Keys in table '{table_name}':")
-            for fk in foreign_keys:
+            for fk in sorted(foreign_keys, key=lambda x: x[3]):
                 # fk 的结构是： (id, seq, table, from, to, on_update, on_delete, match)
                 fk_id = fk[0]
                 fk_from_col = fk[3]

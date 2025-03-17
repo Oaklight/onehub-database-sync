@@ -21,81 +21,81 @@ Tables in the database:
 Details for table 'channels':
 Column Name          Data Type       Nullable Default        
 ------------------------------------------------------------
-id                   bigint          NO       nextval('channels_id_seq'::regclass)
-type                 bigint          YES      0              
-created_time         bigint          YES      None           
-test_time            bigint          YES      None           
-response_time        bigint          YES      None           
 balance              numeric         YES      None           
 balance_updated_time bigint          YES      None           
-used_quota           bigint          YES      0              
-priority             bigint          YES      0              
-only_chat            boolean         YES      false          
-pre_cost             bigint          YES      1              
-plugin               jsonb           YES      None           
+base_url             text            YES      ''::text       
+created_time         bigint          YES      None           
 deleted_at           timestamp with time zone YES      None           
-status               bigint          YES      1              
-weight               bigint          YES      1              
+group                character varying YES      'default'::character varying
+id                   bigint          NO       nextval('channels_id_seq'::regclass)
 key                  text            YES      None           
+model_headers        character varying YES      ''::character varying
+model_mapping        character varying YES      ''::character varying
 models               text            YES      None           
 name                 text            YES      None           
-group                character varying YES      'default'::character varying
-tag                  character varying YES      ''::character varying
-proxy                character varying YES      ''::character varying
-model_mapping        character varying YES      ''::character varying
-base_url             text            YES      ''::text       
+only_chat            boolean         YES      false          
 other                text            YES      None           
-model_headers        character varying YES      ''::character varying
+plugin               jsonb           YES      None           
+pre_cost             bigint          YES      1              
+priority             bigint          YES      0              
+proxy                character varying YES      ''::character varying
+response_time        bigint          YES      None           
+status               bigint          YES      1              
+tag                  character varying YES      ''::character varying
 test_model           character varying YES      ''::character varying
+test_time            bigint          YES      None           
+type                 bigint          YES      0              
+used_quota           bigint          YES      0              
+weight               bigint          YES      1              
 
 Primary Keys: id
 
 Details for table 'logs':
 Column Name          Data Type       Nullable Default        
 ------------------------------------------------------------
-id                   bigint          NO       nextval('logs_id_seq'::regclass)
-user_id              bigint          YES      None           
-created_at           bigint          YES      None           
-type                 bigint          YES      None           
 channel_id           bigint          YES      None           
-request_time         bigint          YES      0              
-is_stream            boolean         YES      false          
-metadata             jsonb           YES      None           
-quota                bigint          YES      0              
-prompt_tokens        bigint          YES      0              
 completion_tokens    bigint          YES      0              
 content              text            YES      None           
-username             text            YES      ''::text       
-token_name           text            YES      ''::text       
+created_at           bigint          YES      None           
+id                   bigint          NO       nextval('logs_id_seq'::regclass)
+is_stream            boolean         YES      false          
+metadata             jsonb           YES      None           
 model_name           text            YES      ''::text       
+prompt_tokens        bigint          YES      0              
+quota                bigint          YES      0              
+request_time         bigint          YES      0              
+token_name           text            YES      ''::text       
+type                 bigint          YES      None           
+user_id              bigint          YES      None           
+username             text            YES      ''::text       
 
 Primary Keys: id
 
 Details for table 'midjourneys':
 Column Name          Data Type       Nullable Default        
 ------------------------------------------------------------
-token_id             bigint          YES      0              
-code                 bigint          YES      None           
-user_id              bigint          YES      None           
-submit_time          bigint          YES      None           
-start_time           bigint          YES      None           
-finish_time          bigint          YES      None           
-channel_id           bigint          YES      None           
-quota                bigint          YES      None           
-id                   bigint          NO       nextval('midjourneys_id_seq'::regclass)
-properties           text            YES      None           
-mode                 text            YES      None           
-buttons              text            YES      None           
-image_url            text            YES      None           
-status               character varying YES      None           
-progress             character varying YES      None           
-fail_reason          text            YES      None           
 action               character varying YES      None           
+buttons              text            YES      None           
+channel_id           bigint          YES      None           
+code                 bigint          YES      None           
+description          text            YES      None           
+fail_reason          text            YES      None           
+finish_time          bigint          YES      None           
+id                   bigint          NO       nextval('midjourneys_id_seq'::regclass)
+image_url            text            YES      None           
 mj_id                text            YES      None           
+mode                 text            YES      None           
+progress             character varying YES      None           
 prompt               text            YES      None           
 prompt_en            text            YES      None           
-description          text            YES      None           
+properties           text            YES      None           
+quota                bigint          YES      None           
+start_time           bigint          YES      None           
 state                text            YES      None           
+status               character varying YES      None           
+submit_time          bigint          YES      None           
+token_id             bigint          YES      0              
+user_id              bigint          YES      None           
 
 Primary Keys: id
 
@@ -109,9 +109,9 @@ Primary Keys: id
 Details for table 'model_owned_by':
 Column Name          Data Type       Nullable Default        
 ------------------------------------------------------------
+icon                 text            YES      None           
 id                   bigint          NO       nextval('model_owned_by_id_seq'::regclass)
 name                 character varying YES      None           
-icon                 text            YES      None           
 
 Primary Keys: id
 
@@ -126,42 +126,42 @@ Primary Keys: key
 Details for table 'orders':
 Column Name          Data Type       Nullable Default        
 ------------------------------------------------------------
-id                   bigint          NO       nextval('orders_id_seq'::regclass)
-user_id              bigint          YES      None           
-gateway_id           bigint          YES      None           
-discount             numeric         YES      0              
-created_at           bigint          YES      None           
-updated_at           bigint          YES      None           
-deleted_at           timestamp with time zone YES      None           
 amount               bigint          YES      0              
-order_amount         numeric         YES      0              
-quota                bigint          YES      0              
+created_at           bigint          YES      None           
+deleted_at           timestamp with time zone YES      None           
+discount             numeric         YES      0              
 fee                  numeric         YES      0              
-trade_no             character varying YES      None           
+gateway_id           bigint          YES      None           
 gateway_no           character varying YES      None           
+id                   bigint          NO       nextval('orders_id_seq'::regclass)
+order_amount         numeric         YES      0              
 order_currency       character varying YES      None           
+quota                bigint          YES      0              
 status               character varying YES      None           
+trade_no             character varying YES      None           
+updated_at           bigint          YES      None           
+user_id              bigint          YES      None           
 
 Primary Keys: id
 
 Details for table 'payments':
 Column Name          Data Type       Nullable Default        
 ------------------------------------------------------------
+config               text            YES      None           
+created_at           bigint          YES      None           
+currency             character varying YES      None           
 deleted_at           timestamp with time zone YES      None           
+enable               boolean         YES      true           
 fixed_fee            numeric         YES      0              
+icon                 character varying YES      None           
+id                   bigint          NO       nextval('payments_id_seq'::regclass)
+name                 character varying NO       None           
+notify_domain        character varying YES      None           
 percent_fee          numeric         YES      0              
 sort                 bigint          YES      1              
-enable               boolean         YES      true           
-created_at           bigint          YES      None           
-updated_at           bigint          YES      None           
-id                   bigint          NO       nextval('payments_id_seq'::regclass)
 type                 character varying YES      None           
+updated_at           bigint          YES      None           
 uuid                 character       YES      None           
-name                 character varying NO       None           
-icon                 character varying YES      None           
-notify_domain        character varying YES      None           
-currency             character varying YES      None           
-config               text            YES      None           
 
 Primary Keys: id
 
@@ -170,70 +170,70 @@ Column Name          Data Type       Nullable Default
 ------------------------------------------------------------
 channel_type         bigint          YES      0              
 input                numeric         YES      0              
-output               numeric         YES      0              
 model                character varying YES      None           
+output               numeric         YES      0              
 type                 text            YES      'tokens'::text 
 
 Details for table 'redemptions':
 Column Name          Data Type       Nullable Default        
 ------------------------------------------------------------
-id                   bigint          NO       nextval('redemptions_id_seq'::regclass)
-user_id              bigint          YES      None           
 created_time         bigint          YES      None           
-redeemed_time        bigint          YES      None           
-status               bigint          YES      1              
-quota                bigint          YES      100            
+id                   bigint          NO       nextval('redemptions_id_seq'::regclass)
 key                  character       YES      None           
 name                 text            YES      None           
+quota                bigint          YES      100            
+redeemed_time        bigint          YES      None           
+status               bigint          YES      1              
+user_id              bigint          YES      None           
 
 Primary Keys: id
 
 Details for table 'statistics':
 Column Name          Data Type       Nullable Default        
 ------------------------------------------------------------
+channel_id           bigint          NO       None           
+completion_tokens    bigint          YES      None           
+date                 date            NO       None           
+model_name           character varying NO       None           
+prompt_tokens        bigint          YES      None           
+quota                bigint          YES      None           
+request_count        bigint          YES      None           
 request_time         bigint          YES      None           
 user_id              bigint          NO       None           
-channel_id           bigint          NO       None           
-date                 date            NO       None           
-request_count        bigint          YES      None           
-quota                bigint          YES      None           
-prompt_tokens        bigint          YES      None           
-completion_tokens    bigint          YES      None           
-model_name           character varying NO       None           
 
-Primary Keys: date, user_id, channel_id, model_name
+Primary Keys: channel_id, date, model_name, user_id
 
 Details for table 'tasks':
 Column Name          Data Type       Nullable Default        
 ------------------------------------------------------------
-id                   bigint          NO       nextval('tasks_id_seq'::regclass)
+action               character varying YES      None           
+channel_id           bigint          YES      None           
 created_at           bigint          YES      None           
-updated_at           bigint          YES      None           
-start_time           bigint          YES      None           
+data                 jsonb           YES      None           
+fail_reason          text            YES      None           
 finish_time          bigint          YES      None           
+id                   bigint          NO       nextval('tasks_id_seq'::regclass)
+notify_hook          text            YES      None           
+platform             character varying YES      None           
 progress             bigint          YES      None           
 properties           jsonb           YES      None           
-data                 jsonb           YES      None           
-token_id             bigint          YES      0              
-user_id              bigint          YES      None           
-channel_id           bigint          YES      None           
 quota                bigint          YES      None           
+start_time           bigint          YES      None           
+status               character varying YES      None           
 submit_time          bigint          YES      None           
 task_id              character varying YES      None           
-platform             character varying YES      None           
-status               character varying YES      None           
-fail_reason          text            YES      None           
-notify_hook          text            YES      None           
-action               character varying YES      None           
+token_id             bigint          YES      0              
+updated_at           bigint          YES      None           
+user_id              bigint          YES      None           
 
 Primary Keys: id
 
 Details for table 'telegram_menus':
 Column Name          Data Type       Nullable Default        
 ------------------------------------------------------------
-id                   bigint          NO       nextval('telegram_menus_id_seq'::regclass)
 command              character varying YES      None           
 description          character varying YES      ''::character varying
+id                   bigint          NO       nextval('telegram_menus_id_seq'::regclass)
 parse_mode           character varying YES      'MarkdownV2'::character varying
 reply_message        text            YES      None           
 
@@ -242,65 +242,63 @@ Primary Keys: id
 Details for table 'tokens':
 Column Name          Data Type       Nullable Default        
 ------------------------------------------------------------
+accessed_time        bigint          YES      None           
+created_time         bigint          YES      None           
 deleted_at           timestamp with time zone YES      None           
-user_id              bigint          YES      None           
+expired_time         bigint          YES      '-1'::integer  
+group                text            YES      ''::text       
+id                   bigint          NO       nextval('tokens_id_seq'::regclass)
+key                  character varying YES      None           
+name                 text            YES      None           
+remain_quota         bigint          YES      0              
+status               bigint          YES      1              
 unlimited_quota      boolean         YES      false          
 used_quota           bigint          YES      0              
-id                   bigint          NO       nextval('tokens_id_seq'::regclass)
-status               bigint          YES      1              
-created_time         bigint          YES      None           
-accessed_time        bigint          YES      None           
-expired_time         bigint          YES      '-1'::integer  
-remain_quota         bigint          YES      0              
-key                  character varying YES      None           
-group                text            YES      ''::text       
-name                 text            YES      None           
+user_id              bigint          YES      None           
 
 Primary Keys: id
 
 Details for table 'user_groups':
 Column Name          Data Type       Nullable Default        
 ------------------------------------------------------------
-ratio                numeric         YES      1              
-public               boolean         YES      false          
+api_rate             bigint          YES      600            
 enable               boolean         YES      true           
 id                   bigint          NO       nextval('user_groups_id_seq'::regclass)
-api_rate             bigint          YES      600            
-symbol               character varying YES      None           
 name                 character varying YES      None           
+public               boolean         YES      false          
+ratio                numeric         YES      1              
+symbol               character varying YES      None           
 
 Primary Keys: id
 
 Details for table 'users':
 Column Name          Data Type       Nullable Default        
 ------------------------------------------------------------
-id                   bigint          NO       nextval('users_id_seq'::regclass)
-telegram_id          bigint          YES      0              
-quota                bigint          YES      0              
-used_quota           bigint          YES      0              
-request_count        bigint          YES      0              
+access_token         character       YES      None           
+aff_code             character varying YES      None           
 aff_count            bigint          YES      0              
-aff_quota            bigint          YES      0              
 aff_history          bigint          YES      0              
-inviter_id           bigint          YES      None           
-last_login_time      bigint          YES      0              
+aff_quota            bigint          YES      0              
+avatar_url           character varying YES      ''::character varying
 created_time         bigint          YES      None           
 deleted_at           timestamp with time zone YES      None           
+display_name         text            YES      None           
+email                text            YES      None           
+github_id            text            YES      None           
+github_id_new        bigint          YES      None           
+group                character varying YES      'default'::character varying
+id                   bigint          NO       nextval('users_id_seq'::regclass)
+inviter_id           bigint          YES      None           
+lark_id              text            YES      None           
+last_login_time      bigint          YES      0              
+password             text            NO       None           
+quota                bigint          YES      0              
+request_count        bigint          YES      0              
 role                 bigint          YES      1              
 status               bigint          YES      1              
-github_id_new        bigint          YES      None           
+telegram_id          bigint          YES      0              
+used_quota           bigint          YES      0              
 username             text            YES      None           
-password             text            NO       None           
-display_name         text            YES      None           
-lark_id              text            YES      None           
-access_token         character       YES      None           
-email                text            YES      None           
-avatar_url           character varying YES      ''::character varying
-github_id            text            YES      None           
-aff_code             character varying YES      None           
 wechat_id            text            YES      None           
-group                character varying YES      'default'::character varying
 
 Primary Keys: id
-
-PostgreSQL database connection closed.

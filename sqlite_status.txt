@@ -1,91 +1,130 @@
 Successfully connected to SQLite database.
 
 Tables in the database:
-- channels
-- sqlite_sequence
-- users
-- options
-- redemptions
 - abilities
-- logs
-- telegram_menus
-- prices
-- midjourneys
+- channels
 - chat_caches
-- orders
-- tasks
-- statistics
-- user_groups
+- logs
+- midjourneys
 - migrations
-- tokens
 - model_owned_by
+- options
+- orders
 - payments
+- prices
+- redemptions
+- sqlite_sequence
+- statistics
+- tasks
+- telegram_menus
+- tokens
+- user_groups
+- users
+
+Details for table 'abilities':
+Column Name          Type            Not Null PK 
+--------------------------------------------------
+channel_id           INTEGER         NO       NO 
+enabled              numeric         NO       NO 
+group                varchar(32)     NO       YES
+model                TEXT            NO       NO 
+priority             INTEGER         NO       NO 
+weight               INTEGER         NO       NO 
 
 Details for table 'channels':
 Column Name          Type            Not Null PK 
 --------------------------------------------------
-id                   INTEGER         NO       YES
-type                 INTEGER         NO       NO 
-key                  TEXT            NO       NO 
-status               INTEGER         NO       NO 
-name                 TEXT            NO       NO 
-weight               INTEGER         NO       NO 
-created_time         INTEGER         NO       NO 
-test_time            INTEGER         NO       NO 
-response_time        INTEGER         NO       NO 
-base_url             TEXT            NO       NO 
-other                TEXT            NO       NO 
 balance              REAL            NO       NO 
 balance_updated_time INTEGER         NO       NO 
-models               TEXT            NO       NO 
-group                varchar(32)     NO       NO 
-tag                  varchar(32)     NO       NO 
-used_quota           INTEGER         NO       NO 
-model_mapping        varchar(1024)   NO       NO 
-model_headers        varchar(1024)   NO       NO 
-priority             INTEGER         NO       NO 
-proxy                varchar(255)    NO       NO 
-test_model           varchar(50)     NO       NO 
-only_chat            numeric         NO       NO 
-pre_cost             INTEGER         NO       NO 
-plugin               JSON            NO       NO 
-deleted_at           datetime        NO       NO 
-
-Details for table 'sqlite_sequence':
-Column Name          Type            Not Null PK 
---------------------------------------------------
-name                                 NO       NO 
-seq                                  NO       NO 
-
-Details for table 'users':
-Column Name          Type            Not Null PK 
---------------------------------------------------
-id                   INTEGER         NO       YES
-username             TEXT            NO       NO 
-password             TEXT            YES      NO 
-display_name         TEXT            NO       NO 
-role                 INTEGER         NO       NO 
-status               INTEGER         NO       NO 
-email                TEXT            NO       NO 
-github_id            TEXT            NO       NO 
-wechat_id            TEXT            NO       NO 
-telegram_id          INTEGER         NO       NO 
-lark_id              TEXT            NO       NO 
-access_token         char(32)        NO       NO 
-quota                INTEGER         NO       NO 
-used_quota           INTEGER         NO       NO 
-request_count        INTEGER         NO       NO 
-group                varchar(32)     NO       NO 
-aff_code             varchar(32)     NO       NO 
-aff_count            INTEGER         NO       NO 
-aff_quota            INTEGER         NO       NO 
-aff_history          INTEGER         NO       NO 
-inviter_id           INTEGER         NO       NO 
+base_url             TEXT            NO       NO 
 created_time         INTEGER         NO       NO 
 deleted_at           datetime        NO       NO 
-avatar_url           varchar(500)    NO       NO 
-github_id_new        INTEGER         NO       NO 
-last_login_time      INTEGER         NO       NO 
+group                varchar(32)     NO       NO 
+id                   INTEGER         NO       YES
+key                  TEXT            NO       NO 
+model_headers        varchar(1024)   NO       NO 
+model_mapping        varchar(1024)   NO       NO 
+models               TEXT            NO       NO 
+name                 TEXT            NO       NO 
+only_chat            numeric         NO       NO 
+other                TEXT            NO       NO 
+plugin               JSON            NO       NO 
+pre_cost             INTEGER         NO       NO 
+priority             INTEGER         NO       NO 
+proxy                varchar(255)    NO       NO 
+response_time        INTEGER         NO       NO 
+status               INTEGER         NO       NO 
+tag                  varchar(32)     NO       NO 
+test_model           varchar(50)     NO       NO 
+test_time            INTEGER         NO       NO 
+type                 INTEGER         NO       NO 
+used_quota           INTEGER         NO       NO 
+weight               INTEGER         NO       NO 
+
+Details for table 'chat_caches':
+Column Name          Type            Not Null PK 
+--------------------------------------------------
+data                 json            YES      NO 
+expiration           bigint          YES      NO 
+hash                 varchar(32)     NO       YES
+user_id              INTEGER         YES      NO 
+
+Details for table 'logs':
+Column Name          Type            Not Null PK 
+--------------------------------------------------
+channel_id           INTEGER         NO       NO 
+completion_tokens    INTEGER         NO       NO 
+content              TEXT            NO       NO 
+created_at           INTEGER         NO       NO 
+id                   INTEGER         NO       YES
+is_stream            numeric         NO       NO 
+metadata             JSON            NO       NO 
+model_name           TEXT            NO       NO 
+prompt_tokens        INTEGER         NO       NO 
+quota                INTEGER         NO       NO 
+request_time         INTEGER         NO       NO 
+token_name           TEXT            NO       NO 
+type                 INTEGER         NO       NO 
+user_id              INTEGER         NO       NO 
+username             TEXT            NO       NO 
+
+Details for table 'midjourneys':
+Column Name          Type            Not Null PK 
+--------------------------------------------------
+action               varchar(40)     NO       NO 
+buttons              TEXT            NO       NO 
+channel_id           INTEGER         NO       NO 
+code                 INTEGER         NO       NO 
+description          TEXT            NO       NO 
+fail_reason          TEXT            NO       NO 
+finish_time          INTEGER         NO       NO 
+id                   INTEGER         NO       YES
+image_url            TEXT            NO       NO 
+mj_id                TEXT            NO       NO 
+mode                 TEXT            NO       NO 
+progress             varchar(30)     NO       NO 
+prompt               TEXT            NO       NO 
+prompt_en            TEXT            NO       NO 
+properties           TEXT            NO       NO 
+quota                INTEGER         NO       NO 
+start_time           INTEGER         NO       NO 
+state                TEXT            NO       NO 
+status               varchar(20)     NO       NO 
+submit_time          INTEGER         NO       NO 
+token_id             INTEGER         NO       NO 
+user_id              INTEGER         NO       NO 
+
+Details for table 'migrations':
+Column Name          Type            Not Null PK 
+--------------------------------------------------
+id                   TEXT            NO       YES
+
+Details for table 'model_owned_by':
+Column Name          Type            Not Null PK 
+--------------------------------------------------
+icon                 TEXT            NO       NO 
+id                   INTEGER         NO       YES
+name                 varchar(100)    NO       NO 
 
 Details for table 'options':
 Column Name          Type            Not Null PK 
@@ -93,212 +132,173 @@ Column Name          Type            Not Null PK
 key                  TEXT            NO       YES
 value                TEXT            NO       NO 
 
-Details for table 'redemptions':
-Column Name          Type            Not Null PK 
---------------------------------------------------
-id                   INTEGER         NO       YES
-user_id              INTEGER         NO       NO 
-key                  char(32)        NO       NO 
-status               INTEGER         NO       NO 
-name                 TEXT            NO       NO 
-quota                INTEGER         NO       NO 
-created_time         INTEGER         NO       NO 
-redeemed_time        INTEGER         NO       NO 
-
-Details for table 'abilities':
-Column Name          Type            Not Null PK 
---------------------------------------------------
-group                varchar(32)     NO       YES
-model                TEXT            NO       NO 
-channel_id           INTEGER         NO       NO 
-enabled              numeric         NO       NO 
-priority             INTEGER         NO       NO 
-weight               INTEGER         NO       NO 
-
-Details for table 'logs':
-Column Name          Type            Not Null PK 
---------------------------------------------------
-id                   INTEGER         NO       YES
-user_id              INTEGER         NO       NO 
-created_at           INTEGER         NO       NO 
-type                 INTEGER         NO       NO 
-content              TEXT            NO       NO 
-username             TEXT            NO       NO 
-token_name           TEXT            NO       NO 
-model_name           TEXT            NO       NO 
-quota                INTEGER         NO       NO 
-prompt_tokens        INTEGER         NO       NO 
-completion_tokens    INTEGER         NO       NO 
-channel_id           INTEGER         NO       NO 
-request_time         INTEGER         NO       NO 
-is_stream            numeric         NO       NO 
-metadata             JSON            NO       NO 
-
-Details for table 'telegram_menus':
-Column Name          Type            Not Null PK 
---------------------------------------------------
-id                   INTEGER         NO       YES
-command              varchar(32)     NO       NO 
-description          varchar(255)    NO       NO 
-parse_mode           varchar(255)    NO       NO 
-reply_message        TEXT            NO       NO 
-
-Details for table 'prices':
-Column Name          Type            Not Null PK 
---------------------------------------------------
-model                varchar(100)    NO       NO 
-type                 TEXT            NO       NO 
-channel_type         INTEGER         NO       NO 
-input                REAL            NO       NO 
-output               REAL            NO       NO 
-
-Details for table 'midjourneys':
-Column Name          Type            Not Null PK 
---------------------------------------------------
-id                   INTEGER         NO       YES
-code                 INTEGER         NO       NO 
-user_id              INTEGER         NO       NO 
-action               varchar(40)     NO       NO 
-mj_id                TEXT            NO       NO 
-prompt               TEXT            NO       NO 
-prompt_en            TEXT            NO       NO 
-description          TEXT            NO       NO 
-state                TEXT            NO       NO 
-submit_time          INTEGER         NO       NO 
-start_time           INTEGER         NO       NO 
-finish_time          INTEGER         NO       NO 
-image_url            TEXT            NO       NO 
-status               varchar(20)     NO       NO 
-progress             varchar(30)     NO       NO 
-fail_reason          TEXT            NO       NO 
-channel_id           INTEGER         NO       NO 
-quota                INTEGER         NO       NO 
-buttons              TEXT            NO       NO 
-properties           TEXT            NO       NO 
-mode                 TEXT            NO       NO 
-token_id             INTEGER         NO       NO 
-
-Details for table 'chat_caches':
-Column Name          Type            Not Null PK 
---------------------------------------------------
-hash                 varchar(32)     NO       YES
-user_id              INTEGER         YES      NO 
-data                 json            YES      NO 
-expiration           bigint          YES      NO 
-
 Details for table 'orders':
 Column Name          Type            Not Null PK 
 --------------------------------------------------
-id                   INTEGER         NO       YES
-user_id              INTEGER         NO       NO 
-gateway_id           INTEGER         NO       NO 
-trade_no             varchar(50)     NO       NO 
-gateway_no           varchar(100)    NO       NO 
 amount               INTEGER         NO       NO 
+created_at           INTEGER         NO       NO 
+deleted_at           datetime        NO       NO 
+discount             decimal(10,2)   NO       NO 
+fee                  decimal(10,2)   NO       NO 
+gateway_id           INTEGER         NO       NO 
+gateway_no           varchar(100)    NO       NO 
+id                   INTEGER         NO       YES
 order_amount         decimal(10,2)   NO       NO 
 order_currency       varchar(16)     NO       NO 
 quota                INTEGER         NO       NO 
-fee                  decimal(10,2)   NO       NO 
-discount             decimal(10,2)   NO       NO 
 status               varchar(32)     NO       NO 
-created_at           INTEGER         NO       NO 
+trade_no             varchar(50)     NO       NO 
 updated_at           INTEGER         NO       NO 
-deleted_at           datetime        NO       NO 
-
-Details for table 'tasks':
-Column Name          Type            Not Null PK 
---------------------------------------------------
-id                   INTEGER         NO       YES
-created_at           INTEGER         NO       NO 
-updated_at           INTEGER         NO       NO 
-task_id              varchar(50)     NO       NO 
-platform             varchar(30)     NO       NO 
 user_id              INTEGER         NO       NO 
-channel_id           INTEGER         NO       NO 
-quota                INTEGER         NO       NO 
-action               varchar(40)     NO       NO 
-status               varchar(20)     NO       NO 
-fail_reason          TEXT            NO       NO 
-submit_time          INTEGER         NO       NO 
-start_time           INTEGER         NO       NO 
-finish_time          INTEGER         NO       NO 
-progress             INTEGER         NO       NO 
-properties           JSON            NO       NO 
-data                 JSON            NO       NO 
-notify_hook          TEXT            NO       NO 
-token_id             INTEGER         NO       NO 
-
-Details for table 'statistics':
-Column Name          Type            Not Null PK 
---------------------------------------------------
-date                 date            NO       YES
-user_id              INTEGER         NO       NO 
-channel_id           INTEGER         NO       NO 
-model_name           varchar(255)    NO       NO 
-request_count        INTEGER         NO       NO 
-quota                INTEGER         NO       NO 
-prompt_tokens        INTEGER         NO       NO 
-completion_tokens    INTEGER         NO       NO 
-request_time         INTEGER         NO       NO 
-
-Details for table 'user_groups':
-Column Name          Type            Not Null PK 
---------------------------------------------------
-id                   INTEGER         NO       YES
-symbol               varchar(50)     NO       NO 
-name                 varchar(50)     NO       NO 
-ratio                decimal(10,2)   NO       NO 
-api_rate             INTEGER         NO       NO 
-public               numeric         NO       NO 
-enable               numeric         NO       NO 
-
-Details for table 'migrations':
-Column Name          Type            Not Null PK 
---------------------------------------------------
-id                   TEXT            NO       YES
-
-Details for table 'tokens':
-Column Name          Type            Not Null PK 
---------------------------------------------------
-id                   INTEGER         NO       YES
-user_id              INTEGER         NO       NO 
-key                  varchar(59)     NO       NO 
-status               INTEGER         NO       NO 
-name                 TEXT            NO       NO 
-created_time         INTEGER         NO       NO 
-accessed_time        INTEGER         NO       NO 
-expired_time         INTEGER         NO       NO 
-remain_quota         INTEGER         NO       NO 
-unlimited_quota      numeric         NO       NO 
-used_quota           INTEGER         NO       NO 
-chat_cache           numeric         NO       NO 
-group                TEXT            NO       NO 
-deleted_at           datetime        NO       NO 
-
-Details for table 'model_owned_by':
-Column Name          Type            Not Null PK 
---------------------------------------------------
-id                   INTEGER         NO       YES
-name                 varchar(100)    NO       NO 
-icon                 TEXT            NO       NO 
 
 Details for table 'payments':
 Column Name          Type            Not Null PK 
 --------------------------------------------------
-id                   INTEGER         NO       YES
-type                 varchar(16)     NO       NO 
-uuid                 char(32)        NO       NO 
-name                 varchar(255)    YES      NO 
-icon                 varchar(300)    NO       NO 
-notify_domain        varchar(300)    NO       NO 
-fixed_fee            decimal(10,2)   NO       NO 
-percent_fee          decimal(10,2)   NO       NO 
-currency             varchar(5)      NO       NO 
 config               TEXT            NO       NO 
-sort                 INTEGER         NO       NO 
-enable               numeric         NO       NO 
 created_at           INTEGER         NO       NO 
-updated_at           INTEGER         NO       NO 
+currency             varchar(5)      NO       NO 
 deleted_at           datetime        NO       NO 
+enable               numeric         NO       NO 
+fixed_fee            decimal(10,2)   NO       NO 
+icon                 varchar(300)    NO       NO 
+id                   INTEGER         NO       YES
+name                 varchar(255)    YES      NO 
+notify_domain        varchar(300)    NO       NO 
+percent_fee          decimal(10,2)   NO       NO 
+sort                 INTEGER         NO       NO 
+type                 varchar(16)     NO       NO 
+updated_at           INTEGER         NO       NO 
+uuid                 char(32)        NO       NO 
+
+Details for table 'prices':
+Column Name          Type            Not Null PK 
+--------------------------------------------------
+channel_type         INTEGER         NO       NO 
+input                REAL            NO       NO 
+model                varchar(100)    NO       NO 
+output               REAL            NO       NO 
+type                 TEXT            NO       NO 
+
+Details for table 'redemptions':
+Column Name          Type            Not Null PK 
+--------------------------------------------------
+created_time         INTEGER         NO       NO 
+id                   INTEGER         NO       YES
+key                  char(32)        NO       NO 
+name                 TEXT            NO       NO 
+quota                INTEGER         NO       NO 
+redeemed_time        INTEGER         NO       NO 
+status               INTEGER         NO       NO 
+user_id              INTEGER         NO       NO 
+
+Details for table 'sqlite_sequence':
+Column Name          Type            Not Null PK 
+--------------------------------------------------
+name                                 NO       NO 
+seq                                  NO       NO 
+
+Details for table 'statistics':
+Column Name          Type            Not Null PK 
+--------------------------------------------------
+channel_id           INTEGER         NO       NO 
+completion_tokens    INTEGER         NO       NO 
+date                 date            NO       YES
+model_name           varchar(255)    NO       NO 
+prompt_tokens        INTEGER         NO       NO 
+quota                INTEGER         NO       NO 
+request_count        INTEGER         NO       NO 
+request_time         INTEGER         NO       NO 
+user_id              INTEGER         NO       NO 
+
+Details for table 'tasks':
+Column Name          Type            Not Null PK 
+--------------------------------------------------
+action               varchar(40)     NO       NO 
+channel_id           INTEGER         NO       NO 
+created_at           INTEGER         NO       NO 
+data                 JSON            NO       NO 
+fail_reason          TEXT            NO       NO 
+finish_time          INTEGER         NO       NO 
+id                   INTEGER         NO       YES
+notify_hook          TEXT            NO       NO 
+platform             varchar(30)     NO       NO 
+progress             INTEGER         NO       NO 
+properties           JSON            NO       NO 
+quota                INTEGER         NO       NO 
+start_time           INTEGER         NO       NO 
+status               varchar(20)     NO       NO 
+submit_time          INTEGER         NO       NO 
+task_id              varchar(50)     NO       NO 
+token_id             INTEGER         NO       NO 
+updated_at           INTEGER         NO       NO 
+user_id              INTEGER         NO       NO 
+
+Details for table 'telegram_menus':
+Column Name          Type            Not Null PK 
+--------------------------------------------------
+command              varchar(32)     NO       NO 
+description          varchar(255)    NO       NO 
+id                   INTEGER         NO       YES
+parse_mode           varchar(255)    NO       NO 
+reply_message        TEXT            NO       NO 
+
+Details for table 'tokens':
+Column Name          Type            Not Null PK 
+--------------------------------------------------
+accessed_time        INTEGER         NO       NO 
+chat_cache           numeric         NO       NO 
+created_time         INTEGER         NO       NO 
+deleted_at           datetime        NO       NO 
+expired_time         INTEGER         NO       NO 
+group                TEXT            NO       NO 
+id                   INTEGER         NO       YES
+key                  varchar(59)     NO       NO 
+name                 TEXT            NO       NO 
+remain_quota         INTEGER         NO       NO 
+status               INTEGER         NO       NO 
+unlimited_quota      numeric         NO       NO 
+used_quota           INTEGER         NO       NO 
+user_id              INTEGER         NO       NO 
+
+Details for table 'user_groups':
+Column Name          Type            Not Null PK 
+--------------------------------------------------
+api_rate             INTEGER         NO       NO 
+enable               numeric         NO       NO 
+id                   INTEGER         NO       YES
+name                 varchar(50)     NO       NO 
+public               numeric         NO       NO 
+ratio                decimal(10,2)   NO       NO 
+symbol               varchar(50)     NO       NO 
+
+Details for table 'users':
+Column Name          Type            Not Null PK 
+--------------------------------------------------
+access_token         char(32)        NO       NO 
+aff_code             varchar(32)     NO       NO 
+aff_count            INTEGER         NO       NO 
+aff_history          INTEGER         NO       NO 
+aff_quota            INTEGER         NO       NO 
+avatar_url           varchar(500)    NO       NO 
+created_time         INTEGER         NO       NO 
+deleted_at           datetime        NO       NO 
+display_name         TEXT            NO       NO 
+email                TEXT            NO       NO 
+github_id            TEXT            NO       NO 
+github_id_new        INTEGER         NO       NO 
+group                varchar(32)     NO       NO 
+id                   INTEGER         NO       YES
+inviter_id           INTEGER         NO       NO 
+lark_id              TEXT            NO       NO 
+last_login_time      INTEGER         NO       NO 
+password             TEXT            YES      NO 
+quota                INTEGER         NO       NO 
+request_count        INTEGER         NO       NO 
+role                 INTEGER         NO       NO 
+status               INTEGER         NO       NO 
+telegram_id          INTEGER         NO       NO 
+used_quota           INTEGER         NO       NO 
+username             TEXT            NO       NO 
+wechat_id            TEXT            NO       NO 
 
 SQLite database connection closed.
