@@ -1,6 +1,5 @@
 [database]
-source_sqlite = "path/to/source.db"
-target_sqlite = "path/to/target.db"
+sqlite_file = "path/to/sqlite.db"  # 用于 migrate_sqlite_to_pg.py 和 sync_pg_to_sqlite.py
 
 [postgresql.cloud]
 dbname = "your_cloud_db"
