@@ -1,7 +1,6 @@
 import sqlite3
 import psycopg
 from psycopg import sql
-
 import tomllib
 
 # 读取配置文件
@@ -11,35 +10,59 @@ with open("config.toml", "rb") as f:
 # 数据库连接配置
 sqlite_db_file = config["database"]["sqlite_file"]
 pg_db_config = {
-    "dbname": config["postgresql"]["dbname"],
-    "user": config["postgresql"]["user"],
-    "password": config["postgresql"]["password"],
-    "host": config["postgresql"]["host"],
-    "port": config["postgresql"]["port"],
+    "dbname": config["postgresql"]["cloud"]["dbname"],
+    "user": config["postgresql"]["cloud"]["user"],
+    "password": config["postgresql"]["cloud"]["password"],
+    "host": config["postgresql"]["cloud"]["host"],
+    "port": int(config["postgresql"]["cloud"]["port"]),
 }
 
-# 数据类型映射
-TYPE_MAPPING = {
-    "INTEGER": "BIGINT",
-    "REAL": "NUMERIC",
-    "TEXT": "TEXT",
-    "varchar": "VARCHAR",
-    "char": "CHAR",
-    "datetime": "TIMESTAMP WITH TIME ZONE",
-    "numeric": "NUMERIC",
-    "JSON": "JSONB",
+# 基于实际schema的显式类型映射
+SCHEMA_MAPPING = {
+    "channels": {"only_chat": "BOOLEAN", "status": "BIGINT", "type": "BIGINT"},
+    "logs": {"is_stream": "BOOLEAN"},
+    "user_groups": {"public": "BOOLEAN", "enable": "BOOLEAN"},
+    "tokens": {"unlimited_quota": "BOOLEAN", "chat_cache": "BOOLEAN"},
+    "payments": {
+        "enable": "BOOLEAN",
+        "fixed_fee": "NUMERIC(10,2)",
+        "percent_fee": "NUMERIC(10,2)",
+    },
+    "users": {"access_token": "VARCHAR(32)"},
 }
 
 
-def convert_type(sqlite_type):
-    """将 SQLite 数据类型转换为 PostgreSQL 数据类型"""
-    # 处理 boolean 类型
-    if sqlite_type.lower() in ["boolean", "bool", "numeric"]:
+def convert_type(sqlite_type, table_name, col_name):
+    """根据schema映射表转换数据类型"""
+    # 首先检查是否有显式映射
+    if table_name in SCHEMA_MAPPING and col_name in SCHEMA_MAPPING[table_name]:
+        return SCHEMA_MAPPING[table_name][col_name]
+
+    # 默认类型映射
+    sqlite_type = sqlite_type.lower().strip()
+    if sqlite_type in ["integer", "bigint"]:
+        return "BIGINT"
+    if sqlite_type in ["real", "float", "double", "numeric", "decimal"]:
+        return "NUMERIC(10,2)"
+    if sqlite_type in ["text", "varchar", "char"]:
+        # 提取长度信息
+        if "(" in sqlite_type:
+            length = sqlite_type.split("(")[1].split(")")[0]
+            return f"VARCHAR({length})"
+        return "TEXT"
+    if sqlite_type in ["datetime", "timestamp"]:
+        return "TIMESTAMP WITH TIME ZONE"
+    if sqlite_type == "date":
+        return "DATE"
+    if sqlite_type == "time":
+        return "TIME"
+    if sqlite_type == "blob":
+        return "BYTEA"
+    if sqlite_type in ["boolean", "bool"]:
         return "BOOLEAN"
+    if sqlite_type in ["json"]:
+        return "JSONB"
 
-    for key, value in TYPE_MAPPING.items():
-        if key in sqlite_type:
-            return value
     return "TEXT"
 
 
@@ -70,7 +93,7 @@ def migrate_table_structure(sqlite_conn, pg_conn):
                 column_defs = []
                 for col in columns:
                     col_name = f'"{col[1]}"' if col[1].lower() == "group" else col[1]
-                    col_type = convert_type(col[2])
+                    col_type = convert_type(col[2], table, col[1])
                     # 特殊处理 users 表的 access_token 列
                     if table == "users" and col[1] == "access_token":
                         col_type = "VARCHAR(32)"
@@ -107,7 +130,6 @@ def migrate_table_structure(sqlite_conn, pg_conn):
                 pg_cursor.execute("ROLLBACK;")
                 print(f"Error creating table {table}: {e}")
 
-
 def migrate_data(sqlite_conn, pg_conn):
     """迁移数据"""
     sqlite_cursor = sqlite_conn.cursor()
@@ -139,20 +161,51 @@ def migrate_data(sqlite_conn, pg_conn):
                 sqlite_cursor.execute(f"PRAGMA table_info({table});")
                 col_info = sqlite_cursor.fetchall()
 
+                # 获取 PostgreSQL 列类型
+                pg_cursor.execute(
+                    f"SELECT column_name, data_type FROM information_schema.columns WHERE table_name = %s;",
+                    (table,),
+                )
+                pg_col_types = {col[0]: col[1] for col in pg_cursor.fetchall()}
+
                 # 转换数据
                 converted_rows = []
                 for row in rows:
                     converted_row = []
                     for i, value in enumerate(row):
+                        col_name = columns[i]
                         col_type = col_info[i][2].lower()
-                        if (
-                            col_type in ["boolean", "bool", "numeric"]
-                            and value is not None
+                        pg_type = pg_col_types.get(col_name, "").lower()
+
+                        # 处理 boolean 类型
+                        if pg_type == "boolean":
+                            # 将各种可能的boolean表示转换为True/False
+                            if value in [1, "1", "true", "True", "TRUE", "t", "T"]:
+                                converted_row.append(True)
+                            elif value in [0, "0", "false", "False", "FALSE", "f", "F"]:
+                                converted_row.append(False)
+                            else:
+                                converted_row.append(None)
+                        # 处理 numeric 类型
+                        elif (
+                            col_type in ["numeric", "decimal", "real"]
+                            or pg_type == "numeric"
                         ):
-                            converted_row.append(bool(value))
+                            # 确保 numeric 值被正确转换为 Decimal
+                            try:
+                                converted_row.append(
+                                    float(value) if value is not None else None
+                                )
+                            except (ValueError, TypeError):
+                                converted_row.append(None)
+                        # 处理 integer 类型
+                        elif col_type in ["integer", "bigint"]:
+                            converted_row.append(
+                                int(value) if value is not None else None
+                            )
                         else:
                             # 特殊处理 users 表的 access_token 列
-                            if table == "users" and columns[i] == "access_token":
+                            if table == "users" and col_name == "access_token":
                                 converted_row.append(str(value)[:32])
                             else:
                                 converted_row.append(value)
@@ -170,7 +223,6 @@ def migrate_data(sqlite_conn, pg_conn):
             except Exception as e:
                 pg_cursor.execute("ROLLBACK;")
                 print(f"Error migrating data to table {table}: {e}")
-
 
 def main():
     # 连接数据库
@@ -194,7 +246,6 @@ def main():
             sqlite_conn.close()
         if pg_conn:
             pg_conn.close()
-
 
 if __name__ == "__main__":
     main()
