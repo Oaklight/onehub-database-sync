@@ -1,0 +1,12 @@
+# Ignore local configuration file
+config.toml
+
+# Ignore SQLite database files
+*.db
+
+one-hub/
+onehub/
+one-api/
+oneapi/
+data/
+log/

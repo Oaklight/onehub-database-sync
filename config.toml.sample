@@ -1,0 +1,17 @@
+[database]
+source_sqlite = "path/to/source.db"
+target_sqlite = "path/to/target.db"
+
+[postgresql.cloud]
+dbname = "your_cloud_db"
+user = "your_cloud_user"
+password = "your_cloud_password"
+host = "your.cloud.host"
+port = 5432
+
+[postgresql.local]
+dbname = "your_local_db"
+user = "your_local_user"
+password = "your_local_password"
+host = "localhost"
+port = 5432
