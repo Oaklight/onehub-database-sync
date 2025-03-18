@@ -1,0 +1,11 @@
+name: sqlite2pg
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - pip=25.0
+  - python=3.12.9
+  - sqlite=3.45.3
+  - postgresql=16
+  - pip:
+      - psycopg==3.2.5

@@ -1,63 +1,98 @@
 import argparse
-import psycopg
+import subprocess
 import tomllib
+import psycopg
 from psycopg import sql
 
 
 def get_db_config(config, db_type):
     """获取数据库配置"""
     return {
-        "dbname": config[f"postgresql.{db_type}"]["dbname"],
-        "user": config[f"postgresql.{db_type}"]["user"],
-        "password": config[f"postgresql.{db_type}"]["password"],
-        "host": config[f"postgresql.{db_type}"]["host"],
-        "port": config[f"postgresql.{db_type}"]["port"],
+        "dbname": config["postgresql"][f"{db_type}"]["dbname"],
+        "user": config["postgresql"][f"{db_type}"]["user"],
+        "password": config["postgresql"][f"{db_type}"]["password"],
+        "host": config["postgresql"][f"{db_type}"]["host"],
+        "port": config["postgresql"][f"{db_type}"]["port"],
     }
 
 
-def sync_table(src_conn, dst_conn, table):
-    """同步单个表"""
-    with src_conn.cursor() as src_cursor, dst_conn.cursor() as dst_cursor:
+def check_postgresql_tools():
+    """检查 PostgreSQL 工具是否可用"""
+    for tool in ["pg_dump", "pg_restore"]:
         try:
-            # 开始事务
-            dst_cursor.execute("BEGIN;")
-
-            # 删除目标表数据
-            dst_cursor.execute(f"TRUNCATE TABLE {table};")
-
-            # 查询源表数据
-            src_cursor.execute(f"SELECT * FROM {table};")
-            rows = src_cursor.fetchall()
-
-            # 获取列名
-            src_cursor.execute(
-                f"SELECT column_name FROM information_schema.columns WHERE table_name = %s;",
-                (table,),
+            subprocess.run(
+                [tool, "--version"],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
             )
-            columns = [row[0] for row in src_cursor.fetchall()]
-
-            # 插入数据
-            insert_sql = sql.SQL("INSERT INTO {} ({}) VALUES ({})").format(
-                sql.Identifier(table),
-                sql.SQL(", ").join(map(sql.Identifier, columns)),
-                sql.SQL(", ").join(sql.Placeholder() * len(columns)),
+        except FileNotFoundError:
+            raise Exception(
+                f"{tool} not found. Please install PostgreSQL client tools (postgresql-client)"
             )
-            dst_cursor.executemany(insert_sql, rows)
-            dst_cursor.execute("COMMIT;")
-            print(f"Synced {len(rows)} rows to table {table}")
-        except Exception as e:
-            dst_cursor.execute("ROLLBACK;")
-            print(f"Error syncing table {table}: {e}")
+
+
+def clean_target_db(dst_config):
+    """跳过清理操作，因为目标数据库为空"""
+    print("✅ Skipping cleanup: target database is assumed to be empty")
+
+
+def replicate_db(src_config, dst_config):
+    """使用 pg_dump 和 pg_restore 复制数据库（带详细错误输出）"""
+
+    dump_cmd = [
+        "pg_dump",
+        "--format=custom",
+        "--no-acl",
+        "--no-owner",
+        f"--dbname=postgresql://{src_config['user']}:{src_config['password']}@{src_config['host']}:{src_config['port']}/{src_config['dbname']}",
+    ]
+
+    restore_cmd = [
+        "pg_restore",
+        "--clean",
+        "--if-exists",
+        "--no-acl",
+        "--no-owner",
+        f"--dbname=postgresql://{dst_config['user']}:{dst_config['password']}@{dst_config['host']}:{dst_config['port']}/{dst_config['dbname']}",
+    ]
+
+    try:
+        # 执行 pg_dump 和 pg_restore
+        with subprocess.Popen(
+            dump_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        ) as dump_process:
+            with subprocess.Popen(
+                restore_cmd, stdin=dump_process.stdout, stderr=subprocess.PIPE
+            ) as restore_process:
+                dump_process.stdout.close()
+                stdout, dump_err = dump_process.communicate()
+                _, restore_err = restore_process.communicate()
+
+                # 检查返回码
+                if dump_process.returncode != 0:
+                    print(f"❌ pg_dump failed with error:\n{dump_err.decode()}")
+                    raise Exception("❌ pg_dump failed")
+
+                if restore_process.returncode != 0:
+                    print(f"❌ pg_restore failed with error:\n{restore_err.decode()}")
+                    raise Exception("❌ pg_restore failed")
+
+        print("✅ Database replication completed successfully")
+
+    except Exception as e:
+        raise Exception(f"❌ Database replication failed: {e}")
 
 
 def main():
     # 解析命令行参数
-    parser = argparse.ArgumentParser(description="Sync PostgreSQL databases")
+    parser = argparse.ArgumentParser(description="Replicate PostgreSQL databases")
     parser.add_argument(
         "direction",
         choices=["cloud-to-local", "local-to-cloud"],
-        help="Sync direction: cloud-to-local or local-to-cloud",
+        help="Replication direction: cloud-to-local or local-to-cloud",
     )
+
     args = parser.parse_args()
 
     # 读取配置文件
@@ -72,29 +107,11 @@ def main():
         src_config = get_db_config(config, "local")
         dst_config = get_db_config(config, "cloud")
 
-    # 连接数据库
-    src_conn = psycopg.connect(**src_config)
-    dst_conn = psycopg.connect(**dst_config)
+    # 清理目标数据库并执行复制
+    clean_target_db(dst_config)
+    replicate_db(src_config, dst_config)
 
-    try:
-        # 获取所有表名
-        with src_conn.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT table_name 
-                FROM information_schema.tables 
-                WHERE table_schema = 'public' AND table_type = 'BASE TABLE';
-            """
-            )
-            tables = [row[0] for row in cursor.fetchall()]
-
-        # 同步每个表
-        for table in tables:
-            sync_table(src_conn, dst_conn, table)
-
-    finally:
-        src_conn.close()
-        dst_conn.close()
+    print("✅ PostgreSQL database replication completed successfully!")
 
 
 if __name__ == "__main__":
