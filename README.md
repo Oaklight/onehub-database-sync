@@ -13,7 +13,7 @@
 ## 适用版本
 
 - SQLite: 3.x
-- PostgreSQL: 12+
+- PostgreSQL: 16
 
 ## 快速开始
 
