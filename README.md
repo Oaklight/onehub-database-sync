@@ -21,7 +21,7 @@
 2. 安装依赖：`pip install -r requirements.txt`
 3. 运行相应脚本：
    - SQLite 到 PostgreSQL 迁移：`python migrate_sqlite_to_pg.py`
-   - PostgreSQL 到 SQLite 同步：`python sync_pg_to_sqlite.py [cloud|local]`
+   <!-- - PostgreSQL 到 SQLite 同步：`python sync_pg_to_sqlite.py [cloud|local]` -->
    - PostgreSQL 双向同步：`python sync_pg.py [cloud-to-local|local-to-cloud]`
 
 ## 配置说明
