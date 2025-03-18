@@ -203,6 +203,13 @@ def migrate_data(sqlite_conn, pg_conn):
                         col_name = columns[i]
                         col_type = col_info[i][2].lower()
                         pg_type = pg_col_types.get(col_name, "").lower()
+                        is_pk = col_info[i][5]  # 检查是否是主键列
+
+                        # 处理主键列，确保不为空
+                        if is_pk and value is None:
+                            raise ValueError(
+                                f"Primary key column {col_name} cannot be null"
+                            )
 
                         # 处理 boolean 类型
                         if pg_type == "boolean":
@@ -227,9 +234,13 @@ def migrate_data(sqlite_conn, pg_conn):
                                 converted_row.append(None)
                         # 处理 integer 类型
                         elif col_type in ["integer", "bigint"]:
-                            converted_row.append(
-                                int(value) if value is not None else None
-                            )
+                            # 对于主键列，确保值被正确转换
+                            if is_pk:
+                                converted_row.append(int(value))
+                            else:
+                                converted_row.append(
+                                    int(value) if value is not None else None
+                                )
                         else:
                             # 特殊处理 users 表的 access_token 列
                             if table == "users" and col_name == "access_token":
@@ -251,6 +262,29 @@ def migrate_data(sqlite_conn, pg_conn):
                 pg_cursor.execute("ROLLBACK;")
                 print(f"Error migrating data to table {table}: {e}")
 
+
+def sync_sequences(pg_conn):
+    """同步所有表的序列值"""
+    with pg_conn.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT table_name, column_name
+            FROM information_schema.columns
+            WHERE column_default LIKE 'nextval%'
+        """
+        )
+        sequences = cursor.fetchall()
+
+        for table, column in sequences:
+            cursor.execute(
+                f"""
+                SELECT setval(pg_get_serial_sequence('{table}', '{column}'),
+                (SELECT MAX({column}) FROM {table}))
+            """
+            )
+            print(f"Synchronized sequence for {table}.{column}")
+
+
 def main():
     # 连接数据库
     try:
@@ -263,6 +297,9 @@ def main():
         # 迁移数据
         migrate_data(sqlite_conn, pg_conn)
 
+        # 同步序列值
+        sync_sequences(pg_conn)
+
         # 提交事务
         pg_conn.commit()
 
@@ -273,6 +310,7 @@ def main():
             sqlite_conn.close()
         if pg_conn:
             pg_conn.close()
+
 
 if __name__ == "__main__":
     main()
