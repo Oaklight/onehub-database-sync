@@ -130,6 +130,27 @@ def migrate_table_structure(sqlite_conn, pg_conn):
                 pg_cursor.execute("ROLLBACK;")
                 print(f"Error creating table {table}: {e}")
 
+
+def validate_numeric_data(sqlite_cursor, table, columns):
+    """验证并修正数值数据"""
+    # 获取 PostgreSQL 列类型
+    sqlite_cursor.execute(f"PRAGMA table_info({table});")
+    col_info = sqlite_cursor.fetchall()
+
+    # 检查每个数值列
+    for col in col_info:
+        col_name = col[1]
+        col_type = col[2].lower()
+
+        # 处理 numeric 类型
+        if col_type in ["numeric", "decimal", "real"]:
+            # 更新超出范围的数值
+            sqlite_cursor.execute(
+                f"UPDATE {table} SET {col_name} = 99999999.99 "
+                f"WHERE {col_name} > 99999999.99;"
+            )
+
+
 def migrate_data(sqlite_conn, pg_conn):
     """迁移数据"""
     sqlite_cursor = sqlite_conn.cursor()
@@ -141,6 +162,12 @@ def migrate_data(sqlite_conn, pg_conn):
     # 排除不需要迁移的表
     tables_to_exclude = ["sqlite_sequence"]
     tables = [table for table in tables if table not in tables_to_exclude]
+
+    # 验证并修正数值数据
+    for table in tables:
+        sqlite_cursor.execute(f"PRAGMA table_info({table});")
+        columns = [col[1] for col in sqlite_cursor.fetchall()]
+        validate_numeric_data(sqlite_cursor, table, columns)
 
     for table in tables:
         # 为每个表创建使用独立连接
